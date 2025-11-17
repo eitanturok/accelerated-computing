@@ -34,3 +34,17 @@ AVX2-512 intrinsic types:
 | `__mmask16` | 16-bit | Mask register for conditional operations | 16 lanes |
 | `__mmask32` | 32-bit | Mask register for conditional operations | 32 lanes |
 | `__mmask64` | 64-bit | Mask register for conditional operations | 64 lanes |
+
+Q: how do you specify if an integer is signed or unsigned with these types?
+A: All the AVX2-512 intrinsic types are signedness-agnostic — it doesn't inherently specify signed or unsigned. The signedness is determined by the intrinsic function you use, not the type itself.
+
+```cpp
+// data of type __m512i does not have an explicit sign
+__m512i data = _mm512_loadu_si512(ptr);
+
+// Treat as signed integers
+__m512i result1 = _mm512_add_epi32(data, data);  // signed addition
+
+// Treat as unsigned integers
+__m512i result2 = _mm512_add_epu32(data, data);  // unsigned addition
+```

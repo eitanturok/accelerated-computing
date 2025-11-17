@@ -41,20 +41,62 @@ void mandelbrot_cpu_scalar(uint32_t img_size, uint32_t max_iters, uint32_t *out)
 }
 
 /// <--- your code here --->
+void print_m512(__m512 v) {
+    float arr[16];
+    _mm512_storeu_ps(arr, v);
+    for (int i = 0; i < 16; i++) {
+        std::cout << arr[i] << " ";
+    }
+    std::cout << std::endl;
+}
 
 void mandelbrot_cpu_vector(uint32_t img_size, uint32_t max_iters, uint32_t *out) {
+    // check image fits
     int VECTOR_SIZE = 16;
     assert(img_size % VECTOR_SIZE == 0);
+
+    // constant for plane coordinate
+    __m512 img_size_vec = _mm512_set1_ps(float(img_size));
+    __m512 scale_vec = _mm512_set1_ps(2.5);
+    __m512 xshift_vec = _mm512_set1_ps(2.0);
+    __m512 yshift_vec = _mm512_set1_ps(1.25);
+
     for (uint64_t i = 0; i < img_size; i+=VECTOR_SIZE) {
         for (uint64_t j = 0; j < img_size; j+=VECTOR_SIZE) {
             std::cout << "i=" << i <<"j=" << j << "\n";
 
+            // vectorized indices
+            __m512 i_vec = _mm512_set_ps(i+15.0, i+14.0, i+13.0, i+12.0, i+11.0, i+10.0, i+9.0, i+8.0, i+7.0, i+6.0, i+5.0, i+4.0, i+3.0, i+2.0, i+1.0, i+0.0);
+            __m512 j_vec = _mm512_set_ps(j+15.0, j+14.0, j+13.0, j+12.0, j+11.0, j+10.0, j+9.0, j+8.0, j+7.0, j+6.0, j+5.0, j+4.0, j+3.0, j+2.0, j+1.0, j+0.0);
+            print_m512(i_vec);
+            print_m512(j_vec);
 
-            __m512i_u vx =
+            // vectorized coordinate plane
+            __m512 cx_vec = _mm512_sub_ps(_mm512_mul_ps(_mm512_div_ps(i_vec, img_size_vec), scale_vec), xshift_vec);
+            __m512 cy_vec = _mm512_sub_ps(_mm512_mul_ps(_mm512_div_ps(j_vec, img_size_vec), scale_vec), yshift_vec);
+            print_m512(cx_vec);
+            print_m512(cy_vec);
 
-            // Get the plane coordinate X for the image pixel.
-            float cx = (float(j) / float(img_size)) * 2.5f - 2.0f;
-            float cy = (float(i) / float(img_size)) * 2.5f - 1.25f;
+            // Innermost loop: start the recursion from z = 0.
+            __m512 x2_vec = _mm512_set1_ps(0.0);
+            __m512 y2_vec = _mm512_set1_ps(0.0);
+            __m512 w_vec = _mm512_set1_ps(0.0);
+            __mmask16 mask = 0b1111111111111111;
+            uint32_t iters = 0;
+
+            while (iters < max_iters) {
+                __m512 x_vec =  _mm512_mask_sub_ps(src, mask, x2, y2)
+                float x = x2 - y2 + cx;
+                float y = w - x2 - y2 + cy;
+                x2 = x * x;
+                y2 = y * y;
+                float z = x + y;
+                w = z * z;
+                if x2 + y2 > 4.0f {
+                    break
+                }
+                ++iters;
+            }
 
         }
     }
