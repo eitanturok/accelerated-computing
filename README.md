@@ -1,3 +1,7 @@
+# Accelerated-Computing
+
+My HW submissions for MIT 6.S894 https://accelerated-computing.academy/fall25/.
+
 # Commands
 
 All commands assume we are in the directory `~/accelerated-computing`
