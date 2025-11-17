@@ -16,6 +16,7 @@ cd accelerated-computing
 # login
 cd telerun
 python telerun.py login
+cd ..
 ```
 
 **Clone a new lab:**
