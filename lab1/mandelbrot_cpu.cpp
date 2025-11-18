@@ -201,51 +201,6 @@ void mandelbrot_cpu_vector(uint32_t img_size, uint32_t max_iters, uint32_t *out)
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-bool while_cond(__m512 iters_vec, __m512 max_iters_vec, __m512 x2_vec, __m512 y2_vec, __mmask16 mask) {
-    const int LT_OP = 1;
-    const int LE_OP = 2;
-    __m512 four_vec = _mm512_set1_ps(4.0);
-
-    // iters < max_iters
-    __mmask16 val1 = _mm512_mask_cmp_ps_mask(mask, iters_vec, max_iters_vec, LT_OP);
-    // x2 + y2 <= 4.0f
-    __m512 my_sum = _mm512_mask_add_ps(iters_vec, mask, x2_vec, y2_vec);
-    print_m512(my_sum);
-    __mmask16 val3 = _mm512_mask_cmp_ps_mask(mask, my_sum, four_vec, LE_OP);
-    std::cout << "val3 " << val3 << "\n";
-    mask = val1 & val3;
-    bool ret = mask != 0;
-    return ret;
-}
-
 /// <--- /your code here --->
 
 ////////////////////////////////////////////////////////////////////////////////
