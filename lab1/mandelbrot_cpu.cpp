@@ -19,7 +19,7 @@ void mandelbrot_cpu_scalar(uint32_t img_size, uint32_t max_iters, uint32_t *out)
             // Get the plane coordinate X for the image pixel.
             float cx = (float(j) / float(img_size)) * 2.5f - 2.0f;
             float cy = (float(i) / float(img_size)) * 2.5f - 1.25f;
-            std::cout << "i=" <<i <<"\t\tj=" << j << "\n" << "cx=" << cx << "\t\tcy=" << cy << "\n"; // todo: remove
+            // std::cout << "i=" <<i <<"\t\tj=" << j << "\n" << "cx=" << cx << "\t\tcy=" << cy << "\n"; // todo: remove
 
             // Innermost loop: start the recursion from z = 0.
             float x2 = 0.0f;
@@ -35,11 +35,11 @@ void mandelbrot_cpu_scalar(uint32_t img_size, uint32_t max_iters, uint32_t *out)
                 w = z * z;
                 ++iters;
                 // todo: remove
-                std::cout << "x=" << x << "\t\ty=" << y << "\n";
-                std::cout << "x2=" << x2 << "\t\ty2=" << y2 << "\n";
-                std::cout << "z=" << z << "\t\tw=" << w << "\n";
+                // std::cout << "x=" << x << "\t\ty=" << y << "\n";
+                // std::cout << "x2=" << x2 << "\t\ty2=" << y2 << "\n";
+                // std::cout << "z=" << z << "\t\tw=" << w << "\n";
             }
-            std::cout << "iters=" << iters << "\n";
+            // std::cout << "iters=" << iters << "\n";
 
             // if (j >= VECTOR_SIZE-1) { // todo: remove
             //     break;
@@ -48,11 +48,11 @@ void mandelbrot_cpu_scalar(uint32_t img_size, uint32_t max_iters, uint32_t *out)
             // Write result.
             out[i * img_size + j] = iters;
 
-            std::cout << "\n\n";
+            // std::cout << "\n\n";
         }
-        if (i >= 0) { // todo: remove
-            break;
-        }
+        // if (i >= 0) { // todo: remove
+        //     break;
+        // }
     }
 }
 
@@ -119,24 +119,25 @@ void mandelbrot_cpu_vector(uint32_t img_size, uint32_t max_iters, uint32_t *out)
     // outer loop iterates over one 16-wide row of pixels at a time
     for (uint64_t i = 0; i < img_size; i+=1) {
         for (uint64_t j = 0; j < img_size; j+=VECTOR_SIZE) {
-            std::cout << "i=" <<i <<"j=" << j << "\n";
+            // std::cout << "i=" <<i <<"j=" << j << "\n";
             i_vec = _mm512_set1_ps(i);
             j_vec = _mm512_add_ps(_mm512_set1_ps(j), range);
-            std::cout << "i_vec=";
-            print_m512(i_vec);
-            std::cout << "j_vec=";
-            print_m512(j_vec);
+
+            // std::cout << "i_vec=";
+            // print_m512(i_vec);
+            // std::cout << "j_vec=";
+            // print_m512(j_vec);
 
             // get coordinate plane
             // cx contain different values; cy repeats the same value
             cx_vec = _mm512_sub_ps(_mm512_mul_ps(_mm512_div_ps(j_vec, img_size_vec), scale), x_shift);
             cy_vec = _mm512_sub_ps(_mm512_mul_ps(_mm512_div_ps(i_vec, img_size_vec), scale), y_shift);
 
-            std::cout << "cx_vec=";
-            print_m512(cx_vec);
-            std::cout << "cy_vec=";
-            print_m512(cy_vec);
-            std::cout << "\n";
+            // std::cout << "cx_vec=";
+            // print_m512(cx_vec);
+            // std::cout << "cy_vec=";
+            // print_m512(cy_vec);
+            // std::cout << "\n";
 
             // set values for inner loop
             x2_vec = _mm512_set1_ps(0.0);
@@ -149,7 +150,7 @@ void mandelbrot_cpu_vector(uint32_t img_size, uint32_t max_iters, uint32_t *out)
 
             // while loop condition
             do_continue = (is_less_than_four(x2_vec, y2_vec, mask, zeros, fours) & _mm512_mask_cmplt_epi32_mask(mask, iters_vec, max_iters_vec)) != 0;
-            std::cout << "do_continue=" << do_continue << "\n";
+            // std::cout << "do_continue=" << do_continue << "\n";
 
             while (do_continue) {
                 // compute x_vec, y_vec
@@ -160,44 +161,44 @@ void mandelbrot_cpu_vector(uint32_t img_size, uint32_t max_iters, uint32_t *out)
                 y_vec = _mm512_mask_sub_ps(zeros, mask, y_vec, y2_vec);
                 y_vec = _mm512_mask_add_ps(zeros, mask, y_vec, cy_vec);
 
-                std::cout << "x_vec=";
-                print_m512(x_vec);
-                std::cout << "y_vec=";
-                print_m512(y_vec);
+                // std::cout << "x_vec=";
+                // print_m512(x_vec);
+                // std::cout << "y_vec=";
+                // print_m512(y_vec);
 
                 // compute x2_vec, y2_vec
                 x2_vec = _mm512_mask_mul_ps(zeros, mask, x_vec, x_vec);
                 y2_vec = _mm512_mask_mul_ps(zeros, mask, y_vec, y_vec);
 
-                std::cout << "x2_vec=";
-                print_m512(x2_vec);
-                std::cout << "y2_vec=";
-                print_m512(y2_vec);
+                // std::cout << "x2_vec=";
+                // print_m512(x2_vec);
+                // std::cout << "y2_vec=";
+                // print_m512(y2_vec);
 
                 // compute z_vec, w_vec
                 z_vec = _mm512_mask_add_ps(zeros, mask, x_vec, y_vec);
                 w_vec = _mm512_mask_mul_ps(zeros, mask, z_vec, z_vec);
 
-                std::cout << "z_vec=";
-                print_m512(z_vec);
-                std::cout << "w_vec=";
-                print_m512(w_vec);
+                // std::cout << "z_vec=";
+                // print_m512(z_vec);
+                // std::cout << "w_vec=";
+                // print_m512(w_vec);
 
                 // update iters, mask, do_continue
                 iters_vec = _mm512_mask_add_epi32(iters_vec, mask, iters_vec, ones);
-                std::cout << "iters_vec=";
-                print_m512i(iters_vec);
-                std::cout << "mask=" << mask << "\n";
+                // std::cout << "iters_vec=";
+                // print_m512i(iters_vec);
+                // std::cout << "mask=" << mask << "\n";
 
                 mask = is_less_than_four(x2_vec, y2_vec, mask, zeros, fours);
                 do_continue = (mask & _mm512_mask_cmplt_epi32_mask(mask, iters_vec, max_iters_vec)) != 0;
-                std::cout << "new_mask=" << mask << "\t\tdo_continue=" << do_continue << "\n";
+                // std::cout << "new_mask=" << mask << "\t\tdo_continue=" << do_continue << "\n";
             }
             // break;
-            _mm512_storeu_si512(&out, iters_vec);
-            std::cout << "\n\n";
+            _mm512_storeu_si512(out + i * img_size + j, iters_vec);
+            // std::cout << "\n\n";
         }
-        break;
+        // break;
     }
 }
 
@@ -395,8 +396,7 @@ void dump_image(
 int main(int argc, char *argv[]) {
     // Get Mandelbrot spec.
     uint32_t img_size = 256;
-    // uint32_t max_iters = 1000;
-    uint32_t max_iters = 2; // todo: remove
+    uint32_t max_iters = 1000;
     enum MandelbrotImpl impl = ALL;
     if (ParseArgsAndMakeSpec(argc, argv, &img_size, &max_iters, &impl))
         return -1;
