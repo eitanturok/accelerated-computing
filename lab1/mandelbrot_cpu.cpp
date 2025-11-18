@@ -19,7 +19,6 @@ void mandelbrot_cpu_scalar(uint32_t img_size, uint32_t max_iters, uint32_t *out)
             // Get the plane coordinate X for the image pixel.
             float cx = (float(j) / float(img_size)) * 2.5f - 2.0f;
             float cy = (float(i) / float(img_size)) * 2.5f - 1.25f;
-            // std::cout << "i=" <<i <<"\t\tj=" << j << "\n" << "cx=" << cx << "\t\tcy=" << cy << "\n"; // todo: remove
 
             // Innermost loop: start the recursion from z = 0.
             float x2 = 0.0f;
@@ -34,25 +33,10 @@ void mandelbrot_cpu_scalar(uint32_t img_size, uint32_t max_iters, uint32_t *out)
                 float z = x + y;
                 w = z * z;
                 ++iters;
-                // todo: remove
-                // std::cout << "x=" << x << "\t\ty=" << y << "\n";
-                // std::cout << "x2=" << x2 << "\t\ty2=" << y2 << "\n";
-                // std::cout << "z=" << z << "\t\tw=" << w << "\n";
             }
-            // std::cout << "iters=" << iters << "\n";
-
-            // if (j >= VECTOR_SIZE-1) { // todo: remove
-            //     break;
-            // }
-
             // Write result.
             out[i * img_size + j] = iters;
-
-            // std::cout << "\n\n";
         }
-        // if (i >= 0) { // todo: remove
-        //     break;
-        // }
     }
 }
 
@@ -113,10 +97,9 @@ void mandelbrot_cpu_vector(uint32_t img_size, uint32_t max_iters, uint32_t *out)
     __m512 w_vec;
     __m512 z_vec;
     __m512i iters_vec;
+    __mmask16 mask;
 
-    __mmask16 mask = 0b1111111111111111; // initially everything is True
-
-    // outer loop iterates over one 16-wide row of pixels at a time
+    // iterate over one 16-wide row of pixels at a time
     for (uint64_t i = 0; i < img_size; i+=1) {
         for (uint64_t j = 0; j < img_size; j+=VECTOR_SIZE) {
             i_vec = _mm512_set1_ps(i);
