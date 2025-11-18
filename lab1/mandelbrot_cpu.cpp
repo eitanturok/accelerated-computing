@@ -83,7 +83,7 @@ void mandelbrot_cpu_vector(uint32_t img_size, uint32_t max_iters, uint32_t *out)
     __m512 cx_vec;
     __m512 cy_vec;
 
-    // init values for inner loop
+    // init values for while loop
     __m512 zeros = _mm512_set1_ps(0.0);
     __m512 fours = _mm512_set1_ps(4.0);
     __m512i ones = _mm512_set1_epi32(1);
@@ -110,7 +110,7 @@ void mandelbrot_cpu_vector(uint32_t img_size, uint32_t max_iters, uint32_t *out)
             cx_vec = _mm512_sub_ps(_mm512_mul_ps(_mm512_div_ps(j_vec, img_size_vec), scale), x_shift);
             cy_vec = _mm512_sub_ps(_mm512_mul_ps(_mm512_div_ps(i_vec, img_size_vec), scale), y_shift);
 
-            // set values for inner loop
+            // set values for while loop
             x2_vec = _mm512_set1_ps(0.0);
             y2_vec = _mm512_set1_ps(0.0);
             w_vec = _mm512_set1_ps(0.0);
