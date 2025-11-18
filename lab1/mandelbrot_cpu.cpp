@@ -194,7 +194,7 @@ void mandelbrot_cpu_vector(uint32_t img_size, uint32_t max_iters, uint32_t *out)
                 std::cout << "new_mask=" << mask << "\t\tdo_continue=" << do_continue << "\n";
             }
             // break;
-            // _mm512_storeu_si512(&out)
+            _mm512_storeu_si512(&out, iters_vec);
             std::cout << "\n\n";
         }
         break;
