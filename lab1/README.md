@@ -1,9 +1,9 @@
-Starter code for 6.S894 [Lab 1](https://accelerated-computing-class.github.io/fall24/labs/lab1).
+# Lab 1
 
-Resources:
-1. https://gist.github.com/MangaD/1fad63756ad8c946ce01dd1d52eff173
+Instructions for LAb 1: [https://accelerated-computing-class.github.io/fall24/labs/lab1](https://accelerated-computing-class.github.io/fall24/labs/lab1).
 
-Notes:
+# Notes:
+
 1. SIMD = single instruction, multiple data. This means instead of processing one data value at a time for every instruction, we can process multiple dat values for every instruction.
 2. How do use SIMD?
     a. *Compiler*
@@ -48,3 +48,8 @@ __m512i result1 = _mm512_add_epi32(data, data);  // signed addition
 // Treat as unsigned integers
 __m512i result2 = _mm512_add_epu32(data, data);  // unsigned addition
 ```
+
+# Resources:
+
+1. https://gist.github.com/MangaD/1fad63756ad8c946ce01dd1d52eff173
+2. https://www.thehypervisor.blog/p/running-your-first-cuda-kernel
