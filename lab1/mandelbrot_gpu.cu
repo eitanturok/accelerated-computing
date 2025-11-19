@@ -5,6 +5,8 @@
 
 #include <cstdint>
 #include <cuda_runtime.h>
+#include <stdio.h> // to print
+#include <assert.h> // for assert statements
 
 /// <--- your code here --->
 
@@ -53,7 +55,39 @@ __global__ void mandelbrot_gpu_vector(
     uint32_t max_iters,
     uint32_t *out /* pointer to GPU memory */
 ) {
-    /* your (GPU) code here... */
+    // check img fits neatly on blocks
+    int block_dim = blockDim.x;
+    int thread = threadIdx.x;
+    assert (img_size % block_dim == 0);
+
+    for (uint64_t i = 0; i < img_size; i+=1) {
+        for (uint64_t j = 0; j < img_size; j += block_dim) {
+            uint64_t idx_i = i;
+            uint64_t idx_j = j + thread;
+
+            // Get the plane coordinate X for the image pixel.
+            float cx = (float(idx_j) / float(img_size)) * 2.5f - 2.0f;
+            float cy = (float(idx_i) / float(img_size)) * 2.5f - 1.25f;
+
+            // Innermost loop: start the recursion from z = 0.
+            float x2 = 0.0f;
+            float y2 = 0.0f;
+            float w = 0.0f;
+            uint32_t iters = 0;
+            while (x2 + y2 <= 4.0f && iters < max_iters) {
+                float x = x2 - y2 + cx;
+                float y = w - x2 - y2 + cy;
+                x2 = x * x;
+                y2 = y * y;
+                float z = x + y;
+                w = z * z;
+                ++iters;
+            }
+
+            // Write result.
+            out[idx_i * img_size + idx_j] = iters;
+        }
+    }
 }
 
 void launch_mandelbrot_gpu_vector(
@@ -61,7 +95,9 @@ void launch_mandelbrot_gpu_vector(
     uint32_t max_iters,
     uint32_t *out /* pointer to GPU memory */
 ) {
-    /* your (CPU) code here... */
+    int num_blocks = 1;
+    int num_thread_per_block = 32;
+    mandelbrot_gpu_vector<<<num_blocks, num_thread_per_block>>>(img_size, max_iters, out);
 }
 
 /// <--- /your code here --->
