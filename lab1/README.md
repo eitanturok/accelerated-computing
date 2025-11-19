@@ -1,7 +1,8 @@
 # Lab 1
 
 Instructions for Lab 1: [https://accelerated-computing-class.github.io/fall24/labs/lab1](https://accelerated-computing-class.github.io/fall24/labs/lab1).
-My writeup for Lab 1 is in the jupyter notebook [here](./lab1.ipynb).
+
+Writeup for Lab 1: this is in the jupyter notebook I wrote [here](./lab1_writeup.ipynb).
 
 # Notes:
 
