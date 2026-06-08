@@ -19,6 +19,25 @@ using data_type = float;
         ret; \
     })
 
+// A locked clock macro that physically pins the clock read to a register dependency
+// this clock returns the time after the instruction is finished executing, not just after the instruction is issued
+#define clock_cycle_locked(dep_var) \
+    ({ \
+        unsigned long long ret = 0; \
+        asm volatile( \
+            "{\n\t" \
+            "  .reg .b32 %t;\n\t" \
+            "  mov.b32 %t, %1;\n\t"        /* 1. Force a read of the FMA register */ \
+            "  .reg .pred %p;\n\t" \
+            "  setp.ne.s32 %p, %t, 0;\n\t" /* 2. Create a predicate based on those bits */ \
+            "  @%p mov.u64 %0, %%clock64;\n\t" /* 3. Predicate the clock read itself! */ \
+            "}" \
+            : "=l"(ret) \
+            : "f"(dep_var) \
+        ); \
+        ret; \
+    })
+
 ////////////////////////////////////////////////////////////////////////////////
 // Basic FMA Latency
 
@@ -32,7 +51,16 @@ fma_latency(data_type *n, unsigned long long *d_start, unsigned long long *d_end
     start_time = clock_cycle();
 
     /// <--- /your code here --->
+    // dependent chain of fma instructions
+    
+    x = fmaf(x, x, x);
+    x = fmaf(x, x, x);
+    // x = fmaf(x, x, x);
+    // x = fmaf(x, x, x);
+    // x = fmaf(x, x, x);
+    // x = fmaf(x, x, x);
 
+    // end_time = clock_cycle_locked(x);
     end_time = clock_cycle();
 
     *n = x;
@@ -55,10 +83,21 @@ __global__ void fma_latency_interleaved(
     // Memory fence to ensure that the reads are done.
     __threadfence();
 
+    y = y+2.0;
     start_time = clock_cycle();
 
     /// <--- /your code here --->
+    x = fmaf(x, x, x);
+    y = fmaf(y, y, y);
 
+    x = fmaf(x, x, x);
+    y = fmaf(y, y, y);
+
+    x = fmaf(x, x, x);
+    y = fmaf(y, y, y);
+
+    x = fmaf(x, x, x);
+    y = fmaf(y, y, y);
     end_time = clock_cycle();
 
     *n = x + y;
@@ -133,6 +172,7 @@ __global__ void fma_latency_no_interleave(
                   << " code snippet = " << (h_time_end - h_time_start) << " cycles" \
                   << std::endl; \
     } while (0)
+    // divide the latency by 6, the number of fmaf calls we make
 
 int main() {
     data_type *d_n = nullptr;
@@ -142,10 +182,12 @@ int main() {
     data_type host_val = 4.0f;
     unsigned long long host_init_time = 0ull;
 
+    // allocate device memory for input value and timing results
     CUDA_CHECK(cudaMalloc(&d_n, sizeof(data_type)));
     CUDA_CHECK(cudaMalloc(&d_start, sizeof(unsigned long long)));
     CUDA_CHECK(cudaMalloc(&d_end, sizeof(unsigned long long)));
 
+    // copy input value and initial timing values to device
     CUDA_CHECK(cudaMemcpy(d_n, &host_val, sizeof(data_type), cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(
         d_start,
